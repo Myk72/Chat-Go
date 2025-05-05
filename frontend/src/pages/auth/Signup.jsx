@@ -88,8 +88,8 @@ const Signup = () => {
           </button>
         </form>
 
-        <div className="flex justify-center text-sm">
-          Already have an account?{" "}
+        <div className="flex justify-center text-sm gap-1">
+          Already have an account?
           <NavLink to="/login" className="font-semibold text-[#4640DE]">
             Login
           </NavLink>

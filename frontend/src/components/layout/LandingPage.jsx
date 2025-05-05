@@ -3,7 +3,7 @@ import { Outlet, NavLink } from "react-router-dom";
 
 const LandingPageLayout = () => {
   return (
-    <div className="h-screen flex flex-col gap-4">
+    <div className="min-h-screen flex flex-col gap-10">
       <header className="bg-white py-4 px-6 sticky top-0 z-10">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">

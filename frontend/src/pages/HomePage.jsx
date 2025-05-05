@@ -18,7 +18,7 @@ const HomePage = () => {
       <div className="items-center flex justify-center gap-4">
         <NavLink
           className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition"
-          to="/login"
+          to="/chat"
         >
           Get Started
         </NavLink>
