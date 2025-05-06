@@ -1,62 +1,30 @@
-import { Paperclip, SendHorizontal } from "lucide-react";
-import React, { useState } from "react";
+import { Paperclip, SearchIcon, SendHorizontal, Trash2 } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import ShowProfile from "../profile/ShowProfile";
+import { Menu } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-const messages = [
-  {
-    id: 1,
-    sender: "Sara Michael",
-    text: "Hey, have you been keeping up with your finances lately?",
-    time: "10:45 PM",
-    type: "text",
-  },
-  {
-    id: 2,
-    sender: "Sara Michael",
-    text: "I've been trying to stay on top of it. It's been a bit of a rollercoaster with unexpected expenses popping up.",
-    time: "10:45 PM",
-    type: "text",
-  },
-  {
-    id: 3,
-    sender: "You",
-    text: "Hey there",
-    time: "11:07 PM",
-    type: "text",
-  },
-  {
-    id: 4,
-    sender: "You",
-    text: "I know what you mean. I've been thinking about setting up a budget to help me manage better. Have you tried anything like that?",
-    time: "11:07 PM",
-    type: "text",
-  },
-  {
-    id: 5,
-    sender: "You",
-    text: "That sounds useful. Maybe I'll give it a try",
-    time: "11:07 PM",
-    type: "text",
-  },
-  {
-    id: 6,
-    sender: "Sara Michael",
-    text: "That sounds useful. Do you have any other tips for staying financially organized? I attached a file.",
-    time: "11:07 PM",
-    type: "text",
-  },
-  // {
-  //   id: 7,
-  //   sender: "You",
-  //   text: "No problem!",
-  //   time: "11:07 PM",
-  //   type: "text",
-  // },
-];
-
-const MessageCard = () => {
+const MessageCard = ({ chat }) => {
+  const { messages } = chat;
   const [profileOpen, setProfileOpen] = useState(false);
+
+  const messagesContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   return (
     <div className="flex flex-col h-full">
       <div
@@ -64,24 +32,70 @@ const MessageCard = () => {
         onClick={() => setProfileOpen(true)}
       >
         <img
-          src="https://i.pravatar.cc/150?img=3"
-          alt="Sara"
+          src={chat.avatar}
+          alt={chat.name}
           className="w-10 h-10 rounded-full"
         />
         <div>
-          <p className="font-semibold text-gray-800">Sara Michael</p>
-          <p className="text-xs text-green-500">Online</p>
+          <p className="font-semibold text-gray-800">{chat.name}</p>
+          <p
+            className={`text-sm text-gray-500 ${
+              chat.online ? "text-green-400" : ""
+            }`}
+          >
+            {chat.online ? "Online" : "Offline"}
+          </p>
+        </div>
+        <div className="ml-auto flex items-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <div className="rounded-full flex items-center justify-center cursor-pointer p-1 hover:bg-gray-200">
+                <Menu className="w-6 h-6 border-none" />
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className={"mr-2"}>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  alert("Search");
+                }}
+              >
+                <SearchIcon className="size-6 mr-2" />
+                <span>Search</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  alert("Delete Chat");
+                }}
+              >
+                <Trash2 className="size-6 text-red-500 mr-2" />
+                <span>Delete</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-2 space-y-3 bg-gray-100">
+      <div
+        className="flex-1 overflow-y-auto px-4 py-2 space-y-3 bg-gray-100"
+        ref={messagesContainerRef}
+      >
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex ${
+            className={`flex flex-row gap-2 items-end ${
               msg.sender === "You" ? "justify-end" : "justify-start"
             }`}
           >
+            {msg.sender !== "You" && (
+              <img
+                src={chat.avatar}
+                alt={chat.name}
+                className="w-8 h-8 rounded-full"
+              />
+            )}
+
             <div
               className={`max-w-xs px-4 py-2 rounded-lg text-sm shadow-md ${
                 msg.sender === "You"
@@ -94,10 +108,18 @@ const MessageCard = () => {
                 {msg.time}
               </div>
             </div>
+
+            {msg.sender === "You" && (
+              <img
+                src="https://www.shutterstock.com/image-photo/young-handsome-man-beard-wearing-260nw-1768126784.jpg"
+                alt={chat.name}
+                className="w-8 h-8 rounded-full"
+              />
+            )}
           </div>
         ))}
       </div>
-      
+
       <div className="px-4 py-3 bg-white flex items-center gap-3 border-t border-l border-gray-100">
         <label className="text-gray-500 hover:text-gray-700 cursor-pointer">
           <Paperclip className="w-5 h-5" />
@@ -118,11 +140,7 @@ const MessageCard = () => {
 
       <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
         <DialogContent>
-          <ShowProfile
-            onSuccess={() => {
-              setProfileOpen(false);
-            }}
-          />
+          <ShowProfile chat={chat} />
         </DialogContent>
       </Dialog>
     </div>
