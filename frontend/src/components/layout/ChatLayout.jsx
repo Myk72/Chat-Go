@@ -5,7 +5,13 @@ import { MessageCircleMoreIcon } from "lucide-react";
 import MessageCard from "../card/MessageCard";
 import useMessageStore from "@/store/message.store.js";
 const ChatLayout = () => {
-  const { selectedChat } = useMessageStore();
+  const { selectedChat, messages } = useMessageStore();
+  const handleNewMessage = () => {
+    useMessageStore.setState((state) => ({
+      selectedChat:
+        state.messages.find((c) => c.chatId === selectedChat.chatId) || null,
+    }));
+  };
   return (
     <div className="flex h-screen w-full flex-row">
       <div className="w-1/3 h-screen">
@@ -19,7 +25,7 @@ const ChatLayout = () => {
         <Topbar />
         <div className="flex-1 overflow-hidden bg-gray-100">
           {selectedChat ? (
-            <MessageCard chat={selectedChat} />
+            <MessageCard chat={selectedChat} onNewMessage={handleNewMessage} />
           ) : (
             <div className="flex items-center justify-center h-full">
               <p className="text-gray-500">Select a chat to start messaging</p>

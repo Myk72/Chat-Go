@@ -11,10 +11,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import useMessageStore from "@/store/message.store.js";
 
-const MessageCard = ({ chat }) => {
+const MessageCard = ({ chat , onNewMessage = () => {} }) => {
   const { messages } = chat;
   const [profileOpen, setProfileOpen] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState("");
 
   const messagesContainerRef = useRef(null);
 
@@ -25,10 +27,39 @@ const MessageCard = ({ chat }) => {
     }
   }, [messages]);
 
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+
+    const messageInput = currentMessage.trim();
+    if (messageInput) {
+      const newMessage = {
+        messageId: Date.now(),
+        sender: "You",
+        text: messageInput,
+        time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        type: "text",
+      };
+
+      useMessageStore.setState((state) => ({
+        messages: state.messages.map((c) =>
+          c.chatId === chat.chatId
+            ? { ...c, messages: [...c.messages, newMessage] }
+            : c
+        )
+      }));
+
+      onNewMessage();
+      setCurrentMessage("");
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div
-        className="flex items-center bg-blue-50 space-x-3 px-4 py-3 border cursor-pointer"
+        className="flex items-center bg-gray-400 space-x-3 px-4 py-3 border cursor-pointer"
         onClick={() => setProfileOpen(true)}
       >
         <img
@@ -37,7 +68,7 @@ const MessageCard = ({ chat }) => {
           className="w-10 h-10 rounded-full"
         />
         <div>
-          <p className="font-semibold text-gray-800">{chat.name}</p>
+          <p className="font-medium font-serif text-white">{chat.name}</p>
           <p
             className={`text-sm text-gray-500 ${
               chat.online ? "text-green-400" : ""
@@ -83,7 +114,7 @@ const MessageCard = ({ chat }) => {
       >
         {messages.map((msg) => (
           <div
-            key={msg.id}
+            key={msg.messageId}
             className={`flex flex-row gap-2 items-end ${
               msg.sender === "You" ? "justify-end" : "justify-start"
             }`}
@@ -108,14 +139,6 @@ const MessageCard = ({ chat }) => {
                 {msg.time}
               </div>
             </div>
-
-            {msg.sender === "You" && (
-              <img
-                src="https://www.shutterstock.com/image-photo/young-handsome-man-beard-wearing-260nw-1768126784.jpg"
-                alt={chat.name}
-                className="w-8 h-8 rounded-full"
-              />
-            )}
           </div>
         ))}
       </div>
@@ -131,9 +154,22 @@ const MessageCard = ({ chat }) => {
             type="text"
             placeholder="Write a message..."
             className="flex-1 focus:outline-none"
+            name="message"
+            value={currentMessage}
+            onChange={(e) => {
+              setCurrentMessage(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSendMessage(e);
+              }
+            }}
           />
         </div>
-        <button className=" text-white rounded-lg flex items-center gap-2">
+        <button
+          className=" text-white rounded-lg flex items-center gap-2"
+          onClick={handleSendMessage}
+        >
           <SendHorizontal className="size-5 text-blue-500" />
         </button>
       </div>
