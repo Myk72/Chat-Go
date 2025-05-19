@@ -139,6 +139,13 @@ const MessageCard = ({ chat , onNewMessage = () => {} }) => {
                 {msg.time}
               </div>
             </div>
+            {/* {msg.sender === "You" && (
+              <img
+                src={chat.avatar}
+                alt={chat.name}
+                className="w-8 h-8 rounded-full"
+              />
+            )} */}
           </div>
         ))}
       </div>

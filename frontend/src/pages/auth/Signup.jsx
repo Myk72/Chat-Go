@@ -77,7 +77,7 @@ const Signup = () => {
               onChange={() => {
                 form.clearErrors("password");
               }}
-              className="border border-[#D6DDEB] rounded-xl p-2 pl-12 w-full"
+              className="border border-[#D6DDEB] rounded-xl p-2 w-full"
             />
           </div>
           <button
