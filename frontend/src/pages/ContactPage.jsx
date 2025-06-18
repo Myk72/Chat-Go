@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 
 const ContactPage = () => {
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="w-full p-6">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Contact ChatGo</h1>
 
       <div className="space-y-6 text-gray-600">

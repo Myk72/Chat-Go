@@ -24,7 +24,7 @@ const Navbar = () => {
   };
 
   const filteredChats = chats.filter((chat) => {
-    // console.log("chat", chat);
+
     const searchName = chat.name || "";
     const searchEmail = chat.email || "";
     const searchUsername = chat.username || "";
@@ -40,11 +40,11 @@ const Navbar = () => {
   });
 
   return (
-    <div className="shadow-sm p-4 h-screen flex flex-col gap-4">
+    <div className="shadow-sm p-2 h-screen flex flex-col gap-4">
       <input
         type="text"
         placeholder="Search..."
-        className="w-full p-2 border rounded-md border-gray-300"
+        className="w-full p-1 border rounded-md border-gray-300"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
       />

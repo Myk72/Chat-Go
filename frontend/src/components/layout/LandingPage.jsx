@@ -5,7 +5,7 @@ const LandingPageLayout = () => {
   return (
     <div className="min-h-screen flex flex-col gap-10">
       <header className="bg-white py-4 px-6 sticky top-0 z-10">
-        <div className="container mx-auto flex justify-between items-center">
+        <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <MessageCircleMoreIcon className="size-8 text-blue-600" />
             <h1 className="text-2xl font-bold text-gray-800">ChatGo</h1>
@@ -80,23 +80,23 @@ const LandingPageLayout = () => {
         </div>
       </header>
 
-      <main className="flex-grow container mx-auto p-8">
-        <div className="flex flex-col lg:flex-row items-center gap-8">
-          <div className="md:w-3/5 w-full flex justify-center">
-            <img
-              src="/chat_people.avif"
-              alt="People chatting on ChatGo"
-              className="max-w-full h-auto"
-            />
-          </div>
-          <div className="md:w-2/5 w-full">
-            <Outlet />
-          </div>
+      <main className="flex-grow h-auto grid grid-cols-2 p-6 gap-2">
+        <div className="flex justify-center items-center shrink-0 border-r">
+          <img
+            src="chat_people.avif"
+            className="object-cover hover:scale-105"
+          />
         </div>
-        <div className="mt-18 pt-4 border-t border-gray-200 text-center text-gray-500 text-sm">
-          <p>© {new Date().getFullYear()} ChatGo. All rights reserved.</p>
+        <div className="flex items-center w-full justify-center">
+          <Outlet />
         </div>
       </main>
+
+      <footer className="bg-gray-50 py-4 px-6 mt-auto">
+        <div className="text-center text-gray-500 text-sm">
+          <p>© {new Date().getFullYear()} ChatGo. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 };

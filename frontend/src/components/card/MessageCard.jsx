@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import useMessageStore from "@/store/message.store.js";
 
-const MessageCard = ({ chat , onNewMessage = () => {} }) => {
+const MessageCard = ({ chat, onNewMessage = () => {} }) => {
   const { messages } = chat;
   const [profileOpen, setProfileOpen] = useState(false);
   const [currentMessage, setCurrentMessage] = useState("");
@@ -48,7 +48,7 @@ const MessageCard = ({ chat , onNewMessage = () => {} }) => {
           c.chatId === chat.chatId
             ? { ...c, messages: [...c.messages, newMessage] }
             : c
-        )
+        ),
       }));
 
       onNewMessage();
@@ -59,21 +59,17 @@ const MessageCard = ({ chat , onNewMessage = () => {} }) => {
   return (
     <div className="flex flex-col h-full">
       <div
-        className="flex items-center bg-gray-400 space-x-3 px-4 py-3 border cursor-pointer"
+        className="flex items-center space-x-3 px-4 py-3 border cursor-pointer"
         onClick={() => setProfileOpen(true)}
       >
         <img
           src={chat.avatar}
           alt={chat.name}
-          className="w-10 h-10 rounded-full"
+          className="size-10 rounded-full"
         />
         <div>
-          <p className="font-medium font-serif text-white">{chat.name}</p>
-          <p
-            className={`text-sm text-gray-500 ${
-              chat.online ? "text-green-400" : ""
-            }`}
-          >
+          <p className="font-medium font-serif ">{chat.name}</p>
+          <p className={`text-sm ${chat.online ? "text-green-400" : ""}`}>
             {chat.online ? "Online" : "Offline"}
           </p>
         </div>
@@ -91,7 +87,7 @@ const MessageCard = ({ chat , onNewMessage = () => {} }) => {
                   alert("Search");
                 }}
               >
-                <SearchIcon className="size-6 mr-2" />
+                <SearchIcon className="size-4 mr-2" />
                 <span>Search</span>
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -100,7 +96,7 @@ const MessageCard = ({ chat , onNewMessage = () => {} }) => {
                   alert("Delete Chat");
                 }}
               >
-                <Trash2 className="size-6 text-red-500 mr-2" />
+                <Trash2 className="size-4 text-red-500 mr-2" />
                 <span>Delete</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -109,45 +105,40 @@ const MessageCard = ({ chat , onNewMessage = () => {} }) => {
       </div>
 
       <div
-        className="flex-1 overflow-y-auto px-4 py-2 space-y-3 bg-gray-100"
+        className="flex-1 overflow-y-auto px-4 py-2 bg-gray-100 flex flex-col"
         ref={messagesContainerRef}
       >
-        {messages.map((msg) => (
-          <div
-            key={msg.messageId}
-            className={`flex flex-row gap-2 items-end ${
-              msg.sender === "You" ? "justify-end" : "justify-start"
-            }`}
-          >
-            {msg.sender !== "You" && (
-              <img
-                src={chat.avatar}
-                alt={chat.name}
-                className="w-8 h-8 rounded-full"
-              />
-            )}
-
+        <div className="mt-auto space-y-3">
+          {messages.map((msg) => (
             <div
-              className={`max-w-xs px-4 py-2 rounded-lg text-sm shadow-md ${
-                msg.sender === "You"
-                  ? "bg-green-600 text-white rounded-br-none"
-                  : "bg-blue-100 text-gray-800 rounded-bl-none"
+              key={msg.messageId}
+              className={`flex flex-row gap-2 items-end ${
+                msg.sender === "You" ? "justify-end" : "justify-start"
               }`}
             >
-              {msg.text}
-              <div className="text-[10px] text-right mt-1 opacity-70">
-                {msg.time}
+              {msg.sender !== "You" && (
+                <img
+                  src={chat.avatar}
+                  alt={chat.name}
+                  className="w-8 h-8 rounded-full"
+                />
+              )}
+
+              <div
+                className={`max-w-xs px-4 py-2 rounded-lg text-sm shadow-md ${
+                  msg.sender === "You"
+                    ? "bg-green-600 text-white rounded-br-none"
+                    : "bg-blue-100 text-gray-800 rounded-bl-none"
+                }`}
+              >
+                {msg.text}
+                <div className="text-xs text-right mt-1 opacity-70">
+                  {msg.time}
+                </div>
               </div>
             </div>
-            {/* {msg.sender === "You" && (
-              <img
-                src={chat.avatar}
-                alt={chat.name}
-                className="w-8 h-8 rounded-full"
-              />
-            )} */}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       <div className="px-4 py-3 bg-white flex items-center gap-3 border-t border-l border-gray-100">

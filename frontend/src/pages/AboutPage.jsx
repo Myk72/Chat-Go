@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 
 const AboutPage = () => {
   return (
-    <div className="mx-auto">
+    <div className="w-full p-6">
       <h1 className="text-3xl font-bold text-gray-800 mb-4">About ChatGo</h1>
 
       <div className="space-y-4 text-gray-600">

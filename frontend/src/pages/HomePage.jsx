@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 
 const HomePage = () => {
   return (
-    <div className="w-full max-w-lg mx-auto">
+    <div className="w-full">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-3">
           Welcome to ChatGo

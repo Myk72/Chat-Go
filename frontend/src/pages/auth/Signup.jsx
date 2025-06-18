@@ -10,7 +10,7 @@ const Signup = () => {
   } = useForm();
   const handleLogin = async (data) => {};
   return (
-    <div className="flex flex-col gap-4 justify-center items-center font-serif">
+    <div className="flex flex-col gap-4 justify-center items-center font-serif w-full p-6">
       <div className="items-center justify-center flex">
         <h1 className="text-3xl font-bold text-indigo-600">Signup to Today</h1>
       </div>
