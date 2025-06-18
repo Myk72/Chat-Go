@@ -84,7 +84,7 @@ const LandingPageLayout = () => {
         <div className="flex justify-center items-center shrink-0 border-r">
           <img
             src="chat_people.avif"
-            className="object-cover hover:scale-105"
+            className="object-cover hover:scale-105 duration-500"
           />
         </div>
         <div className="flex items-center w-full justify-center">

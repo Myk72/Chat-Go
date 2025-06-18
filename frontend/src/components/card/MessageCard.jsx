@@ -1,8 +1,7 @@
-import { Paperclip, SearchIcon, SendHorizontal, Trash2 } from "lucide-react";
+import { EllipsisVertical, Paperclip, SearchIcon, SendHorizontal, Trash2 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import ShowProfile from "../profile/ShowProfile";
-import { Menu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,11 +64,11 @@ const MessageCard = ({ chat, onNewMessage = () => {} }) => {
         <img
           src={chat.avatar}
           alt={chat.name}
-          className="size-10 rounded-full"
+          className="size-9 rounded-full"
         />
         <div>
           <p className="font-medium font-serif ">{chat.name}</p>
-          <p className={`text-sm ${chat.online ? "text-green-400" : ""}`}>
+          <p className={`text-xs ${chat.online ? "text-green-400" : ""}`}>
             {chat.online ? "Online" : "Offline"}
           </p>
         </div>
@@ -77,7 +76,7 @@ const MessageCard = ({ chat, onNewMessage = () => {} }) => {
           <DropdownMenu>
             <DropdownMenuTrigger>
               <div className="rounded-full flex items-center justify-center cursor-pointer p-1 hover:bg-gray-200">
-                <Menu className="w-6 h-6 border-none" />
+                <EllipsisVertical className="w-6 h-6 border-none" />
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className={"mr-2"}>
