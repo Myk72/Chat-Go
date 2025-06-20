@@ -1,40 +1,80 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { NavLink } from "react-router-dom";
+import ErrorMessage from "@/components/ErrorMessage";
+import { useAuthStore } from "@/store/auth.store";
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
   const {
     register,
     handleSubmit,
     formState: { errors },
+    clearErrors,
   } = useForm();
-  const handleLogin = async (data) => {};
+
+  const { signup } = useAuthStore();
+
+  const navigate = useNavigate();
+
+  const onSubmit = async (data) => {
+    try {
+      const response = await signup(data);
+      if (response) {
+        alert("Signup successful! Please check your email for verification.");
+        navigate("/verify-email", { state: { email: data.email } });
+      }
+    } catch (error) {
+      console.error("Signup failed:", error);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4 justify-center items-center font-serif w-full p-6">
       <div className="items-center justify-center flex">
         <h1 className="text-3xl font-bold text-indigo-600">Signup to Today</h1>
       </div>
       <div className="flex flex-col gap-2 w-full">
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={handleSubmit(handleLogin)}
-        >
-          <div className="space-y-2">
-            <label className="font-semibold">Full Name</label>
-            <input
-              type="text"
-              id="fullName"
-              {...register("fullName", {
-                required: {
-                  value: true,
-                  message: "Full Name is required",
-                },
-              })}
-              placeholder="Enter Full Name"
-              name="fullName"
-              onChange={() => form.clearErrors("fullName")}
-              className="border border-[#D6DDEB] rounded-xl p-2 w-full"
-            />
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="font-semibold">First Name</label>
+              <input
+                type="text"
+                id="firstName"
+                {...register("firstName", {
+                  required: {
+                    value: true,
+                    message: "First Name is required",
+                  },
+                })}
+                placeholder="Enter First Name"
+                onChange={() => clearErrors("firstName")}
+                className="border border-[#D6DDEB] rounded-xl p-2 w-full"
+              />
+              {errors.firstName && (
+                <ErrorMessage message={errors.firstName.message} />
+              )}
+            </div>
+            <div className="space-y-2">
+              <label className="font-semibold">Last Name</label>
+              <input
+                type="text"
+                id="lastName"
+                {...register("lastName", {
+                  required: {
+                    value: true,
+                    message: "Last Name is required",
+                  },
+                })}
+                placeholder="Enter Last Name"
+                onChange={() => clearErrors("lastName")}
+                className="border border-[#D6DDEB] rounded-xl p-2 w-full"
+              />
+              {errors.lastName && (
+                <ErrorMessage message={errors.lastName.message} />
+              )}
+            </div>
           </div>
           <div className="space-y-2">
             <label className="font-semibold">Email</label>
@@ -53,9 +93,10 @@ const Signup = () => {
               })}
               placeholder="Enter email address"
               name="email"
-              onChange={() => form.clearErrors("email")}
+              onChange={() => clearErrors("email")}
               className="border border-[#D6DDEB] rounded-xl p-2 w-full"
             />
+            {errors.email && <ErrorMessage message={errors.email.message} />}
           </div>
 
           <div className="space-y-2">
@@ -75,10 +116,13 @@ const Signup = () => {
               })}
               placeholder="Enter password"
               onChange={() => {
-                form.clearErrors("password");
+                clearErrors("password");
               }}
               className="border border-[#D6DDEB] rounded-xl p-2 w-full"
             />
+            {errors.password && (
+              <ErrorMessage message={errors.password.message} />
+            )}
           </div>
           <button
             className="border rounded-full bg-[#4640DE] text-white justify-center p-2 cursor-pointer"

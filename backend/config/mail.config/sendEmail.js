@@ -11,7 +11,7 @@ export const sendVerificationEmail = async ({email, verificationToken}) => {
             to: email,
             subject: "Verify Your Email",
             text : "Please verify your email with the following code",
-            html: VerificationCodeEmail({ email, verificationToken })
+            html: VerificationCodeEmail({ verificationToken })
         });
  
         console.log("Email sent successfully");
@@ -30,7 +30,7 @@ export const sendResetPasswordEmail = async ({email, resetToken}) => {
             to: email,
             subject: "Reset Your Password",
             text : "Please reset your password with the following link",
-            html: ResetPasswordEmail(email, resetToken)
+            html: ResetPasswordEmail(resetToken)
         });
  
         console.log("Email sent successfully");

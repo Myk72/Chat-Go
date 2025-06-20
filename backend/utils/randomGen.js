@@ -13,6 +13,7 @@ export const generateToken  = (res, userId) => {
         sameSite : "strict"
     }
     );
+    // console.log(token," token");
     return token;
     
 }

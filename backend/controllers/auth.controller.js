@@ -7,9 +7,8 @@ import {
   sendVerificationEmail,
 } from "../config/mail.config/sendEmail.js";
 
-
 export const signup = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { firstName, lastName, email, password } = req.body;
   try {
     const userExist = await User.findOne({
       email,
@@ -21,13 +20,14 @@ export const signup = async (req, res) => {
     const verificationToken = generateVerificationCode();
 
     const newUser = await User.create({
-      name,
+      firstName,
+      lastName,
       email,
       password: passwordhashed,
       verification_token: verificationToken,
-      verifcationTokenExpires: Date.now() + 24 * 60 * 60 * 1000,
+      verificationTokenExpires: Date.now() + 24 * 60 * 60 * 1000,
     });
-    generateToken(res, newUser._id);
+
     await sendVerificationEmail({ email, verificationToken });
     await newUser.save();
     res.status(201).json({
@@ -58,6 +58,7 @@ export const login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
+
     generateToken(res, user._id);
     user.lastLogin = Date.now();
     await user.save();
@@ -83,12 +84,14 @@ export const logout = async (req, res) => {
 };
 
 export const VerifyEmail = async (req, res) => {
-  const { verification_token, _id } = req.body;
+  const { token, email } = req.body;
+  console.log("Email:", email, "Token:", token);
+
   try {
     const user = await User.findOne({
-      _id,
-      verification_token,
-      verifcationTokenExpires: { $gt: Date.now() },
+      email,
+      verification_token: token,
+      verificationTokenExpires: { $gt: Date.now() },
     });
     if (!user) {
       return res
@@ -96,7 +99,7 @@ export const VerifyEmail = async (req, res) => {
         .json({ message: "Invalid or expired verification code" });
     }
     user.verification_token = undefined;
-    user.verifcationTokenExpires = undefined;
+    user.verificationTokenExpires = undefined;
     user.is_verified = true;
     await user.save();
     res.status(200).json({
@@ -123,18 +126,16 @@ export const forgotPassword = async (req, res) => {
       return res.status(400).json({ message: "User not found" });
     }
     const resetToken = crypto.randomBytes(20).toString("hex");
-    const resetTokenExpires = Date.now() + 1 * 60 * 60 * 1000; // expires in 1 hours
+    const resetTokenExpires = Date.now() + 1 * 60 * 60 * 1000;
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = resetTokenExpires;
     await user.save();
 
     await sendResetPasswordEmail({ email, resetToken });
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Password reset link sent to your email",
-      });
+    res.status(200).json({
+      success: true,
+      message: "Password reset link sent to your email",
+    });
   } catch {
     res.status(400).json({ success: false, message: "Error" });
     throw error;
@@ -188,16 +189,14 @@ export const ResendVerificationEmail = async (req, res) => {
     }
     const verificationToken = generateVerificationCode();
     user.verification_token = verificationToken;
-    user.verifcationTokenExpires = Date.now() + 24 * 60 * 60 * 1000;
+    user.verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000;
     await user.save();
     await sendVerificationEmail({ email, verificationToken });
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Verification email sent",
-        user: { ...user._doc, password: undefined },
-      });
+    res.status(200).json({
+      success: true,
+      message: "Verification email sent",
+      user: { ...user._doc, password: undefined },
+    });
   } catch {
     res.status(400).json({ success: false, message: error.message });
   }

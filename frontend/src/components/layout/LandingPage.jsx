@@ -1,7 +1,9 @@
 import { MessageCircleMoreIcon } from "lucide-react";
 import { Outlet, NavLink } from "react-router-dom";
+import { useAuthStore } from "@/store/auth.store";
 
 const LandingPageLayout = () => {
+  const { isAuthenticated } = useAuthStore();
   return (
     <div className="min-h-screen flex flex-col gap-10">
       <header className="bg-white py-4 px-6 sticky top-0 z-10">
@@ -51,31 +53,35 @@ const LandingPageLayout = () => {
               Contact us
             </NavLink>
 
-            <NavLink
-              to="/signup"
-              className={({ isActive }) =>
-                `px-3 py-2 rounded-md text-sm font-medium ${
-                  isActive
-                    ? "bg-blue-100 text-blue-600"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                }`
-              }
-            >
-              Sign Up
-            </NavLink>
+            {!isAuthenticated && (
+              <NavLink
+                to="/signup"
+                className={({ isActive }) =>
+                  `px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive
+                      ? "bg-blue-100 text-blue-600"
+                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  }`
+                }
+              >
+                Sign Up
+              </NavLink>
+            )}
 
-            <NavLink
-              to="/login"
-              className={({ isActive }) =>
-                `px-3 py-2 rounded-md text-sm font-medium ${
-                  isActive
-                    ? "bg-blue-100 text-blue-600"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                }`
-              }
-            >
-              Login
-            </NavLink>
+            {!isAuthenticated && (
+              <NavLink
+                to="/login"
+                className={({ isActive }) =>
+                  `px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive
+                      ? "bg-blue-100 text-blue-600"
+                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  }`
+                }
+              >
+                Login
+              </NavLink>
+            )}
           </nav>
         </div>
       </header>

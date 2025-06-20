@@ -1,14 +1,29 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { NavLink } from "react-router-dom";
+import { useAuthStore } from "@/store/auth.store";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const {
     register,
     handleSubmit,
     formState: { errors },
+    clearErrors,
   } = useForm();
-  const handleLogin = async (data) => {};
+  const { login } = useAuthStore();
+  const navigate = useNavigate();
+  const handleLogin = async (data) => {
+    try {
+      const resp = await login(data);
+      if (resp) {
+        navigate("/chat");
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      alert("Login failed. Please check your credentials.");
+    }
+  };
   return (
     <div className="flex flex-col gap-3 justify-center items-center font-serif w-full p-6">
       <div className="items-center justify-center flex">
@@ -36,7 +51,7 @@ const LoginPage = () => {
               })}
               placeholder="Enter email address"
               name="email"
-              onChange={() => form.clearErrors("email")}
+              onChange={() => clearErrors("email")}
               className="border border-[#D6DDEB] rounded-xl p-2 w-full"
             />
           </div>
@@ -58,7 +73,7 @@ const LoginPage = () => {
               })}
               placeholder="Enter password"
               onChange={() => {
-                form.clearErrors("password");
+                clearErrors("password");
               }}
               className="border border-[#D6DDEB] rounded-xl p-2 w-full"
             />

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Navbar from "../bar/Navbar";
+import Navbar from "../components/bar/Navbar";
 import {
   MessageCircleMoreIcon,
   Menu,
@@ -9,15 +9,17 @@ import {
   Sun,
   LogOut,
 } from "lucide-react";
-import MessageCard from "../card/MessageCard";
+import MessageCard from "../components/card/MessageCard";
 import useMessageStore from "@/store/message.store.js";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/store/auth.store";
 
-const ChatLayout = () => {
+const ChatPage = () => {
   const { selectedChat, messages } = useMessageStore();
   const [showMenu, setShowMenu] = useState(false);
   const [theme, setTheme] = useState("light");
   const navigate = useNavigate();
+  const { logout } = useAuthStore();
 
   const handleNewMessage = () => {
     useMessageStore.setState((state) => ({
@@ -75,8 +77,9 @@ const ChatLayout = () => {
             </div>
             <div
               className="mt-auto cursor-pointer p-2 flex space-x-4 hover:bg-gray-100 border-t"
-              onClick={() => {
+              onClick={async () => {
                 setShowMenu(false);
+                await logout();
                 navigate("/login");
               }}
             >
@@ -92,4 +95,4 @@ const ChatLayout = () => {
   );
 };
 
-export default ChatLayout;
+export default ChatPage;
