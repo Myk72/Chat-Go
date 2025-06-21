@@ -4,19 +4,22 @@ import {
   MessageCircleMoreIcon,
   Menu,
   User,
-  Settings,
   Moon,
+  SettingsIcon,
   Sun,
   LogOut,
 } from "lucide-react";
+import Settings from "./Settings";
 import MessageCard from "../components/card/MessageCard";
 import useMessageStore from "@/store/message.store.js";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/auth.store";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const ChatPage = () => {
   const { selectedChat, messages } = useMessageStore();
   const [showMenu, setShowMenu] = useState(false);
+  const [settingOpen, setSettingOpen] = useState(false);
   const [theme, setTheme] = useState("light");
   const navigate = useNavigate();
   const { logout } = useAuthStore();
@@ -62,8 +65,14 @@ const ChatPage = () => {
                   <User />
                   <span>My Profile</span>
                 </div>
-                <div className="flex items-center space-x-2 cursor-pointer border-b p-2 hover:bg-gray-100">
-                  <Settings />
+                <div
+                  className="flex items-center space-x-2 cursor-pointer border-b p-2 hover:bg-gray-100"
+                  onClick={() => {
+                    setShowMenu(false);
+                    setSettingOpen(true);
+                  }}
+                >
+                  <SettingsIcon />
                   <span>Settings</span>
                 </div>
                 <div
@@ -91,6 +100,11 @@ const ChatPage = () => {
           <div className="flex-1" onClick={() => setShowMenu(false)} />
         </div>
       )}
+      <Dialog open={settingOpen} onOpenChange={setSettingOpen}>
+        <DialogContent className={"sm:max-w-md"}>
+          <Settings />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
