@@ -15,11 +15,13 @@ import useMessageStore from "@/store/message.store.js";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/auth.store";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import MyProfile from "@/components/Profile";
 
 const ChatPage = () => {
   const { selectedChat, messages } = useMessageStore();
   const [showMenu, setShowMenu] = useState(false);
   const [settingOpen, setSettingOpen] = useState(false);
+  const [myProfileOpen, setMyProfileOpen] = useState(false);
   const [theme, setTheme] = useState("light");
   const navigate = useNavigate();
   const { logout } = useAuthStore();
@@ -61,7 +63,13 @@ const ChatPage = () => {
             <div className="space-y-6">
               <h2 className="text-2xl font-bold">Menu</h2>
               <div className="space-y-4">
-                <div className="flex items-center space-x-2 cursor-pointer border-b p-2 hover:bg-gray-100">
+                <div
+                  className="flex items-center space-x-2 cursor-pointer border-b p-2 hover:bg-gray-100"
+                  onClick={() => {
+                    setShowMenu(false);
+                    setMyProfileOpen(true);
+                  }}
+                >
                   <User />
                   <span>My Profile</span>
                 </div>
@@ -103,6 +111,11 @@ const ChatPage = () => {
       <Dialog open={settingOpen} onOpenChange={setSettingOpen}>
         <DialogContent className={"sm:max-w-md"}>
           <Settings />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={myProfileOpen} onOpenChange={setMyProfileOpen}>
+        <DialogContent className={"sm:max-w-md"}>
+          <MyProfile />
         </DialogContent>
       </Dialog>
     </div>

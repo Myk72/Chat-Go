@@ -11,7 +11,6 @@ import VerifyEmail from "./pages/VerifyEmail";
 import { useEffect } from "react";
 import { useAuthStore } from "./store/auth.store";
 import { useNavigate } from "react-router-dom";
-import Settings from "./pages/Settings";
 
 const AuthRedirect = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
@@ -85,7 +84,6 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/settings" element={<Settings />} />
 
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
