@@ -8,6 +8,7 @@ import {
   SettingsIcon,
   Sun,
   LogOut,
+  Users,
 } from "lucide-react";
 import Settings from "./Settings";
 import MessageCard from "../components/card/MessageCard";
@@ -72,6 +73,16 @@ const ChatPage = () => {
                 >
                   <User />
                   <span>My Profile</span>
+                </div>
+                <div
+                  className="flex items-center space-x-2 cursor-pointer border-b p-2 hover:bg-gray-100"
+                  onClick={() => {
+                    setShowMenu(false);
+                    setMyProfileOpen(true);
+                  }}
+                >
+                  <Users />
+                  <span>New Group</span>
                 </div>
                 <div
                   className="flex items-center space-x-2 cursor-pointer border-b p-2 hover:bg-gray-100"

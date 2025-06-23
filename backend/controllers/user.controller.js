@@ -35,26 +35,28 @@ export const updateProfilePic = async (req, res) => {
   }
 };
 
-export const getAllUsers = async (req, res) => {
+export const searchUsers = async (req, res) => {
+  const query = req.query.q || "";
+
   try {
-    const { userId } = req.body;
-    const users = await User.find({ _id: { $ne: userId } }).select(
-      "-password -verification_token -resetPasswordToken -resetPasswordExpires -verifcationTokenExpires"
-    );
+    const users = await User.find(
+      { $text: { $search: query }, is_verified: true },
+      { score: { $meta: "textScore" } }
+    )
+      .sort({ score: { $meta: "textScore" } })
+      .limit(20)
+      .select("firstName lastName username email profilePic is_online");
 
-    if (users) {
-      res.status(200).json({
-        success: true,
-        message: "Users fetched successfully",
-        users: users,
-      });
-    }
-
+    res.status(200).json({
+      success: true,
+      message: "Users fetched successfully",
+      users,
+    });
   } catch (error) {
+    console.error("Search error:", error);
     res.status(500).json({ success: false, message: "Error fetching users" });
   }
 };
-
 
 export const getMessage = async (req, res) => {
   const { id } = req.params;
@@ -64,7 +66,9 @@ export const getMessage = async (req, res) => {
         { sender: req.userId, receiver: id },
         { sender: id, receiver: req.userId },
       ],
-    }).populate("sender", "name profilePic").populate("receiver", "name profilePic");
+    })
+      .populate("sender", "name profilePic")
+      .populate("receiver", "name profilePic");
 
     if (messages) {
       res.status(200).json({
@@ -76,12 +80,14 @@ export const getMessage = async (req, res) => {
       res.status(404).json({ success: false, message: "No messages found" });
     }
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error fetching messages" });
+    res
+      .status(500)
+      .json({ success: false, message: "Error fetching messages" });
   }
-}
+};
 
 export const sendMessage = async (req, res) => {
-  const {id} = req.params;
+  const { id } = req.params;
   const { content } = req.body;
   if (req.files && req.files.file) {
     const file = req.files.file;
@@ -90,7 +96,7 @@ export const sendMessage = async (req, res) => {
     );
     content = uploadedResponse.secure_url;
   }
-  
+
   try {
     const message = await Message.create({
       sender: req.userId,
@@ -104,9 +110,11 @@ export const sendMessage = async (req, res) => {
         message: message,
       });
     } else {
-      res.status(404).json({ success: false, message: "Error sending message" });
+      res
+        .status(404)
+        .json({ success: false, message: "Error sending message" });
     }
   } catch (error) {
     res.status(500).json({ success: false, message: "Error sending message" });
   }
-}
+};
