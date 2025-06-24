@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/auth.store";
+import { useUserStore } from "@/store/user.store";
 import {
   LockKeyhole,
   UserCircle2,
@@ -18,6 +19,7 @@ import { Button } from "@/components/ui/button";
 
 const Settings = () => {
   const { user } = useAuthStore();
+  const { uploadProfilePic } = useUserStore();
   const [image, setImage] = useState(null);
 
   const [openField, setOpenField] = useState(null);
@@ -30,10 +32,6 @@ const Settings = () => {
     oldPassword: "",
     newPassword: "",
   });
-
-  useEffect(() => {
-    console.log("Image changed:", image);
-  }, [image]);
 
   const handleSave = () => {
     console.log("Updated data:", formData);
@@ -60,7 +58,10 @@ const Settings = () => {
             />
           ) : (
             <div className="w-20 h-20 bg-blue-500 rounded-full mb-1 flex items-center justify-center">
-              <span className="text-white text-3xl">{user.firstName[0]}</span>
+              <span className="text-white text-3xl">
+                {user.firstName.charAt(0).toUpperCase() +
+                  user.lastName.charAt(0).toUpperCase()}
+              </span>
             </div>
           )}
           <div className="absolute top-13 right-40 hover:bg-gray-200 bg-gray-50 p-1 rounded-full">
@@ -69,9 +70,18 @@ const Settings = () => {
               <input
                 type="file"
                 className="hidden"
-                onChange={(e) => {
+                onChange={async (e) => {
                   const file = e.target.files[0];
-                  setImage(file);
+                  console.log("Selected file:", file);
+                  if (file) {
+                    try {
+                      setImage(file);
+                      const response = await uploadProfilePic(file);
+                      console.log("Profile picture updated:", response);
+                    } catch (error) {
+                      console.error("Error updating profile picture:", error);
+                    }
+                  }
                 }}
               />
             </label>

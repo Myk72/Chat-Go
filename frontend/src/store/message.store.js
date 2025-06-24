@@ -1,24 +1,31 @@
 import { create } from "zustand";
+import { api } from "@/lib/api";
 
 const useMessageStore = create((set) => ({
   messages: [],
-  selectedChat: null,
 
-  fetchChat: async () => {
+  fetchChat: async (receiverId) => {
     try {
-      setTimeout(() => {
-        set({ messages: chats });
-      }, 1000);
+      const res = await api.get(`/messages/${receiverId}`);
+      set((state) => ({
+        messages: res.data.messages,
+      }));
+      return res.data.messages;
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
   },
-  addMessage: (message) =>
-    set((state) => ({ messages: [...state.messages, message] })),
-  removeMessage: (id) =>
-    set((state) => ({
-      messages: state.messages.filter((msg) => msg.id !== id),
-    })),
+  sendMessage: async (receiverId, content) => {
+    try {
+      const res = await api.post(`/messages/${receiverId}`, { content });
+      set((state) => ({
+        messages: [...state.messages, res.data.message],
+      }));
+      return res.data.message;
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  },
 }));
 
 export default useMessageStore;

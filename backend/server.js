@@ -6,6 +6,7 @@ import { connectToMongoDB } from "./config/database.config.js";
 import userRouter from "./routes/user.route.js";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
+import messageRouter from "./routes/message.route.js";
 dotenv.config();
 
 const app = express();
@@ -17,12 +18,14 @@ app.use(cors(
     credentials: true,
   }
 ));
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(fileUpload({ useTempFiles: true, tempFileDir: "/tmp/" }));
 
 app.use("/api/auth", router);
 app.use("/api/user", userRouter);
+app.use("/api/messages", messageRouter);
 
 app.listen(PORT, () => {
   connectToMongoDB();

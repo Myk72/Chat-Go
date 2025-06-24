@@ -1,23 +1,45 @@
 import React, { useEffect, useState } from "react";
 import ChatCard from "../card/ChatCard";
 import useMessageStore from "@/store/message.store.js";
+import { useAuthStore } from "@/store/auth.store";
 import { useUserStore } from "@/store/user.store";
+import { XCircle } from "lucide-react";
 
 const Navbar = () => {
   const { selectedChat, messages: chats, fetchChat } = useMessageStore();
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { users, getUsers } = useUserStore();
+  const { users, getUsers, selectedUser, getUserConversation, conversations } =
+    useUserStore();
+  const { user } = useAuthStore();
+
+  const [filteredChats, setFilteredChats] = useState([]);
 
   useEffect(() => {
-    fetchChat();
-  }, [fetchChat]);
+    getUserConversation();
+  }, []);
+
+  useEffect(() => {
+    if (!conversations) return;
+
+    const filtered = conversations.map((conversation) => {
+      const friend = conversation.members.find(
+        (member) => member._id !== user?._id
+      );
+      return {
+        chatId: conversation._id,
+        receiver: friend,
+        lastMessage: conversation.lastMessage,
+        lastMessageTime: conversation.updatedAt,
+      };
+    });
+    console.log("Filtered Chats:", filtered);
+    setFilteredChats(filtered);
+  }, [conversations, selectedUser]);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (searchQuery.trim() === "") {
-        setSearchResults([]);
         return;
       }
 
@@ -25,11 +47,8 @@ const Navbar = () => {
         setLoading(true);
         try {
           const res = await getUsers(searchQuery);
-          const data = res.data;
-          setSearchResults(data.users || []);
         } catch (err) {
           console.error("Error searching users:", err);
-          setSearchResults([]);
         } finally {
           setLoading(false);
         }
@@ -41,14 +60,8 @@ const Navbar = () => {
     return () => clearTimeout(delayDebounce);
   }, [searchQuery]);
 
-  const handleChatClick = (chat) => {
-    const updatedChats = chats.map((c) =>
-      c.chatId === chat.chatId ? { ...c, unreadCount: 0 } : c
-    );
-    useMessageStore.setState({
-      messages: updatedChats,
-      selectedChat: chat,
-    });
+  const handleChatClick = (friends) => {
+    useUserStore.setState({ selectedUser: friends.receiver });
   };
 
   return (
@@ -56,7 +69,7 @@ const Navbar = () => {
       <input
         type="text"
         placeholder="Search users..."
-        className="w-full p-1 border rounded-md border-gray-300"
+        className="w-full p-2 border rounded-md border-gray-300"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
       />
@@ -66,26 +79,39 @@ const Navbar = () => {
           {loading ? (
             <div className="text-center text-gray-500 py-4">Searching...</div>
           ) : searchQuery.trim() !== "" ? (
-            searchResults.length > 0 ? (
-              searchResults.map((user) => (
-                <ChatCard
+            users.length > 0 ? (
+              users.map((user) => (
+                <div
                   key={user._id}
-                  chat={{
-                    name: `${user.firstName} ${user.lastName}`,
-                    email: user.email,
-                    username: user.username,
-                    chatId: user._id,
+                  className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
+                  onClick={() => {
+                    useUserStore.setState({ selectedUser: user });
+                    setSearchQuery("");
                   }}
-                  isActive={selectedChat?.chatId === user._id}
-                  onClick={() =>
-                    handleChatClick({
-                      chatId: user._id,
-                      name: `${user.firstName} ${user.lastName}`,
-                      email: user.email,
-                      username: user.username,
-                    })
-                  }
-                />
+                >
+                  {user.profilePic ? (
+                    <img
+                      src={user.profilePic}
+                      alt={`${user.firstName} ${user.lastName}`}
+                      className="w-10 h-10 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                      <span className="text-white">
+                        {user.firstName.charAt(0).toUpperCase()}
+                        {user.lastName.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex flex-col">
+                    <span className="font-semibold">
+                      {user.firstName} {user.lastName}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      @{user.username || user.email}
+                    </span>
+                  </div>
+                </div>
               ))
             ) : (
               <div className="text-center text-gray-500 py-4">
@@ -93,12 +119,14 @@ const Navbar = () => {
               </div>
             )
           ) : (
-            chats.map((chat) => (
+            filteredChats.map((friends) => (
               <ChatCard
-                key={chat.chatId}
-                chat={chat}
-                isActive={selectedChat?.chatId === chat.chatId}
-                onClick={() => handleChatClick(chat)}
+                key={friends?.chatId}
+                receiver={friends?.receiver}
+                lastMessage={friends?.lastMessage}
+                lastMessageTime={friends?.lastMessageTime}
+                isActive={false}
+                onClick={() => handleChatClick(friends)}
               />
             ))
           )}

@@ -1,15 +1,17 @@
 import { User } from "../models/user.model.js";
-import { Message } from "../models/message.model.js";
+import { Conversation } from "../models/conversation.model.js";
 import cloudinary from "../config/cloudinary.config.js";
+import jwt from "jsonwebtoken";
+
 export const updateProfilePic = async (req, res) => {
-  const userId = req.userId;
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+  const userId = jwt.verify(token, process.env.JWT_SECRET).userId;
+
   try {
-    if (!req.files || !req.files.profilePic) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No file uploaded" });
-    }
-    const profilePic = req.files.profilePic;
+    const profilePic = req.files && req.files.file ? req.files.file : null;
     console.log(profilePic);
     if (profilePic) {
       const uploadedResponse = await cloudinary.uploader.upload(
@@ -37,15 +39,30 @@ export const updateProfilePic = async (req, res) => {
 
 export const searchUsers = async (req, res) => {
   const query = req.query.q || "";
-
   try {
-    const users = await User.find(
-      { $text: { $search: query }, is_verified: true },
-      { score: { $meta: "textScore" } }
-    )
-      .sort({ score: { $meta: "textScore" } })
+    const users = await User.find({
+      $or: [
+        { username: { $regex: `^${query}`, $options: "i" } },
+        { firstName: { $regex: `^${query}`, $options: "i" } },
+        { lastName: { $regex: `^${query}`, $options: "i" } },
+        // I need to have search by full name here
+        {
+          $expr: {
+            $regexMatch: {
+              input: { $concat: ["$firstName", " ", "$lastName"] },
+              regex: `^${query}`,
+              options: "i",
+            },
+          },
+        },
+      ],
+
+      is_verified: true,
+    })
       .limit(20)
       .select("firstName lastName username email profilePic is_online");
+
+    // console.log(users, "users");
 
     res.status(200).json({
       success: true,
@@ -58,63 +75,30 @@ export const searchUsers = async (req, res) => {
   }
 };
 
-export const getMessage = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const messages = await Message.find({
-      $or: [
-        { sender: req.userId, receiver: id },
-        { sender: id, receiver: req.userId },
-      ],
-    })
-      .populate("sender", "name profilePic")
-      .populate("receiver", "name profilePic");
+export const getUserConversation = async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+  const userId = jwt.verify(token, process.env.JWT_SECRET).userId;
 
-    if (messages) {
-      res.status(200).json({
-        success: true,
-        message: "Messages fetched successfully",
-        messages: messages,
-      });
-    } else {
-      res.status(404).json({ success: false, message: "No messages found" });
-    }
+  try {
+    const conversations = await Conversation.find({
+      members: { $in: [userId] },
+      isGroup: false,
+    })
+      .populate("members", "firstName lastName username bio email profilePic is_online")
+      .sort({ updatedAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      message: "Conversations fetched successfully",
+      conversations,
+    });
   } catch (error) {
+    console.error("Error fetching conversations:", error);
     res
       .status(500)
-      .json({ success: false, message: "Error fetching messages" });
-  }
-};
-
-export const sendMessage = async (req, res) => {
-  const { id } = req.params;
-  const { content } = req.body;
-  if (req.files && req.files.file) {
-    const file = req.files.file;
-    const uploadedResponse = await cloudinary.uploader.upload(
-      file.tempFilePath
-    );
-    content = uploadedResponse.secure_url;
-  }
-
-  try {
-    const message = await Message.create({
-      sender: req.userId,
-      receiver: id,
-      content: content,
-    });
-    if (message) {
-      res.status(200).json({
-        success: true,
-        message: "Message sent successfully",
-        message: message,
-      });
-    } else {
-      res
-        .status(404)
-        .json({ success: false, message: "Error sending message" });
-    }
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Error sending message" });
+      .json({ success: false, message: "Error fetching conversations" });
   }
 };
