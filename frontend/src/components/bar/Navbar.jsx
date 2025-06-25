@@ -6,7 +6,6 @@ import { useUserStore } from "@/store/user.store";
 import { XCircle } from "lucide-react";
 
 const Navbar = () => {
-  const { selectedChat, messages: chats, fetchChat } = useMessageStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const { users, getUsers, selectedUser, getUserConversation, conversations } =
@@ -30,7 +29,6 @@ const Navbar = () => {
         chatId: conversation._id,
         receiver: friend,
         lastMessage: conversation.lastMessage,
-        lastMessageTime: conversation.updatedAt,
       };
     });
     console.log("Filtered Chats:", filtered);
@@ -61,7 +59,8 @@ const Navbar = () => {
   }, [searchQuery]);
 
   const handleChatClick = (friends) => {
-    useUserStore.setState({ selectedUser: friends.receiver });
+    useUserStore.setState({ 
+      selectedUser: friends.receiver });
   };
 
   return (
@@ -124,8 +123,7 @@ const Navbar = () => {
                 key={friends?.chatId}
                 receiver={friends?.receiver}
                 lastMessage={friends?.lastMessage}
-                lastMessageTime={friends?.lastMessageTime}
-                isActive={false}
+                isActive={friends?.receiver?._id === selectedUser?._id}
                 onClick={() => handleChatClick(friends)}
               />
             ))

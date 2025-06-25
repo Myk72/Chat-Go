@@ -59,7 +59,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    generateToken(res,  user._id);
+    generateToken(res, user._id);
     user.lastLogin = Date.now();
     await user.save();
     res.status(200).json({
@@ -74,6 +74,7 @@ export const login = async (req, res) => {
         profilePic: user.profilePic,
         bio: user.bio,
         is_verified: user.is_verified,
+        is_online: user.is_online,
       },
     });
   } catch (error) {

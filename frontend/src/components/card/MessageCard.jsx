@@ -54,7 +54,6 @@ const MessageCard = ({ receiver }) => {
     try {
       const resp = await sendMessage(receiver._id, messageInput);
       setCurrentMessage("");
-
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -131,32 +130,33 @@ const MessageCard = ({ receiver }) => {
           ref={messagesContainerRef}
         >
           <div className="mt-auto space-y-3">
-            {messages.map((msg) => (
-              <div
-                key={msg._id}
-                className={`flex ${
-                  msg.sender._id !== receiver._id
-                    ? "justify-end"
-                    : "justify-start"
-                }`}
-              >
+            {messages.map((msg) => {
+              const isSender = msg.sender._id !== receiver._id;
+              return (
                 <div
-                  className={`max-w-xs px-4 py-2 rounded-lg text-sm shadow-md ${
-                    msg.sender._id !== receiver._id
-                      ? "bg-green-600 text-white rounded-br-none"
-                      : "bg-blue-100 text-gray-800 rounded-bl-none"
+                  key={msg._id}
+                  className={`flex ${
+                    isSender ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {msg.content}
-                  <div className="text-xs text-right mt-1 opacity-70">
-                    {new Date(msg.timestamp).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                  <div
+                    className={`max-w-xl px-4 py-2 rounded-lg text-sm shadow-md ${
+                      isSender
+                        ? "bg-green-600 text-white rounded-br-none"
+                        : "bg-blue-100 text-gray-800 rounded-bl-none"
+                    }`}
+                  >
+                    <div>{msg.content}</div>
+                    <div className={`text-xs opacity-70 text-end`}>
+                      {new Date(msg.timestamp).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -167,19 +167,27 @@ const MessageCard = ({ receiver }) => {
           <input type="file" accept="image/*" className="hidden" />
         </label>
 
-        <div className="flex-1 relative">
-          <input
-            type="text"
+        <div className="flex-1">
+          <textarea
             placeholder="Write a message..."
-            className="flex-1 focus:outline-none w-full"
-            name="message"
+            className="w-full resize-none overflow-auto focus:outline-none text-sm"
             value={currentMessage}
+            rows={1}
+            style={{
+              maxHeight: "120px",
+            }}
             onChange={(e) => {
               setCurrentMessage(e.target.value);
+
+              const textarea = e.target;
+              textarea.style.height = "auto";
+              textarea.style.height = `${textarea.scrollHeight}px`;
             }}
             onKeyDown={(e) => {
-              if (e.key === "Enter") {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
                 handleSendMessage(e);
+                e.target.style.height = "auto";
               }
             }}
           />

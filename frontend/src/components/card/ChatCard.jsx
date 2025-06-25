@@ -5,7 +5,6 @@ const ChatCard = ({
   isActive,
   onClick,
   lastMessage,
-  lastMessageTime,
 }) => {
   return (
     <div
@@ -32,7 +31,7 @@ const ChatCard = ({
           )}
           <span
             className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
-              receiver.online ? "bg-green-500" : "bg-gray-400"
+              receiver.is_online ? "bg-green-500" : "bg-gray-400"
             }`}
           ></span>
         </div>
@@ -40,22 +39,18 @@ const ChatCard = ({
           <p className="font-semibold text-gray-900">
             {receiver.firstName} {receiver.lastName}
           </p>
-          <p className="text-sm text-gray-500 truncate w-72">{lastMessage}</p>
+          <p className="text-sm text-gray-500 truncate w-72">{lastMessage.content}</p>
         </div>
       </div>
 
       <div className="text-right">
         <p className="text-xs text-gray-400">
-          {new Date(lastMessageTime).toLocaleTimeString([], {
+          {new Date(lastMessage.timestamp).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
           })}
         </p>
-        {/* {receiver.unreadCount > 0 && (
-          <span className="bg-blue-500 text-white text-xs w-5 h-5 inline-flex items-center justify-center rounded-full mb-1">
-            {receiver.unreadCount}
-          </span>
-        )} */}
+        
       </div>
     </div>
   );

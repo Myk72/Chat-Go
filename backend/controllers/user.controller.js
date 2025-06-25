@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { User } from "../models/user.model.js";
 import { Conversation } from "../models/conversation.model.js";
 import cloudinary from "../config/cloudinary.config.js";
@@ -87,7 +88,11 @@ export const getUserConversation = async (req, res) => {
       members: { $in: [userId] },
       isGroup: false,
     })
-      .populate("members", "firstName lastName username bio email profilePic is_online")
+      .populate(
+        "members",
+        "firstName lastName username bio email profilePic is_online"
+      )
+      .populate("lastMessage", "content sender receiver timestamp status")
       .sort({ updatedAt: -1 });
 
     res.status(200).json({
@@ -100,5 +105,67 @@ export const getUserConversation = async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Error fetching conversations" });
+  }
+};
+
+export const editProfile = async (req, res) => {
+  // firstName
+  //   lastName
+  //   bio
+  //   email
+  //   username
+  //   password: newPassword
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+  const userId = jwt.verify(token, process.env.JWT_SECRET).userId;
+  const {
+    firstName,
+    lastName,
+    bio,
+    email,
+    username,
+    oldPassword,
+    newPassword,
+  } = req.body.formData;
+  console.log("Edit Profile Data:", req.body);
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+    if (newPassword) {
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!isMatch) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid Credientials" });
+      }
+    }
+
+    user.firstName = firstName || user.firstName;
+    user.lastName = lastName || user.lastName;
+    user.bio = bio || user.bio;
+    user.email = email || user.email;
+    user.username = username || user.username;
+
+    if (newPassword !== "") {
+      const passwordhashed = await bcrypt.hash(newPassword, 12);
+      user.password = passwordhashed;
+    }
+
+    const updatedUser = await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ success: false, message: "Error updating profile" });
   }
 };

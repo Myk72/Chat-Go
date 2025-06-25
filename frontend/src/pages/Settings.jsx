@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 
 const Settings = () => {
   const { user } = useAuthStore();
-  const { uploadProfilePic } = useUserStore();
+  const { uploadProfilePic, editProfile } = useUserStore();
   const [image, setImage] = useState(null);
 
   const [openField, setOpenField] = useState(null);
@@ -33,8 +33,14 @@ const Settings = () => {
     newPassword: "",
   });
 
-  const handleSave = () => {
+  const handleSave = async () => {
     console.log("Updated data:", formData);
+    try {
+      await editProfile(formData);
+      console.log("Profile updated successfully");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
 
     setOpenField(null);
   };
@@ -224,6 +230,8 @@ const Settings = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, oldPassword: e.target.value })
                 }
+                required
+                minLength={6}
                 className="border-b p-2 focus:outline-none border-blue-600 w-full"
               />
 
@@ -234,6 +242,8 @@ const Settings = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, newPassword: e.target.value })
                 }
+                required
+                minLength={6}
                 className="border-b p-2 focus:outline-none border-blue-600 w-full"
               />
             </div>

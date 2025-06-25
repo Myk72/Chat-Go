@@ -52,4 +52,18 @@ export const useUserStore = create((set) => ({
       throw error;
     }
   },
+
+  editProfile: async (formData) => {
+    set({ loading: false, error: null });
+    try {
+      const response = await api.put("/user/editProfile", { formData });
+      const data = response.data;
+      set({ loading: false, users: data.users });
+      return data;
+    } catch (error) {
+      console.log("Error in editProfile:", error);
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
 }));

@@ -24,6 +24,7 @@ const ChatPage = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [settingOpen, setSettingOpen] = useState(false);
   const [myProfileOpen, setMyProfileOpen] = useState(false);
+  const [logoutVerify, setLogoutVerify] = useState(false);
   const [theme, setTheme] = useState("light");
   const navigate = useNavigate();
   const { logout, user } = useAuthStore();
@@ -119,8 +120,7 @@ const ChatPage = () => {
               className="mt-auto cursor-pointer py-2 flex space-x-4 hover:bg-gray-100 border-t"
               onClick={async () => {
                 setShowMenu(false);
-                await logout();
-                navigate("/login");
+                setLogoutVerify(true);
               }}
             >
               <LogOut />
@@ -139,6 +139,34 @@ const ChatPage = () => {
       <Dialog open={myProfileOpen} onOpenChange={setMyProfileOpen}>
         <DialogContent className={"sm:max-w-md"}>
           <MyProfile />
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={logoutVerify}
+        onOpenChange={setLogoutVerify}
+        className="sm:max-w-md"
+      >
+        <DialogContent className="p-6">
+          <h2 className="text-lg font-semibold">Confirm Logout</h2>
+          <p className="text-gray-600">Are you sure you want to logout?</p>
+          <div className="flex justify-end space-x-2">
+            <button
+              className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 cursor-pointer"
+              onClick={() => setLogoutVerify(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 cursor-pointer"
+              onClick={async () => {
+                setLogoutVerify(false);
+                await logout();
+                navigate("/login");
+              }}
+            >
+              Logout
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

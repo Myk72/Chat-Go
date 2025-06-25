@@ -65,12 +65,32 @@ export const sendMessage = async (req, res) => {
       status: "sent",
     });
 
-    conversation.lastMessage = message.content;
+    conversation.lastMessage = message._id;
     await conversation.save();
 
     res.status(201).json({ success: true, message });
   } catch (error) {
     console.error("Error sending message:", error);
     res.status(500).json({ success: false, message: "Error sending message" });
+  }
+};
+
+export const getMessageById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const message = await Message.findById(id)
+      .populate("sender", "username profilePic")
+      .populate("receiver", "username profilePic");
+
+    if (!message) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Message not found" });
+    }
+
+    res.status(200).json({ success: true, message });
+  } catch (error) {
+    console.error("Error fetching message:", error);
+    res.status(500).json({ success: false, message: "Error fetching message" });
   }
 };
