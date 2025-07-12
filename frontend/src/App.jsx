@@ -11,6 +11,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import { useEffect } from "react";
 import { useAuthStore } from "./store/auth.store";
 import { useNavigate } from "react-router-dom";
+import ResetPassword from "./pages/auth/resetPassword";
 
 const AuthRedirect = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
@@ -44,7 +45,7 @@ const ProtectedRoute = ({ children }) => {
 
 const App = () => {
   return (
-    <div className="w-full h-screen flex justify-center items-center overflow-hidden">
+    <div className="w-full min-h-screen flex justify-center items-center">
       <Routes>
         <Route element={<LandingPageLayout />}>
           <Route
@@ -68,6 +69,14 @@ const App = () => {
             element={
               <AuthRedirect>
                 <VerifyEmail />
+              </AuthRedirect>
+            }
+          />
+          <Route
+            path="/reset-password/:id"
+            element={
+              <AuthRedirect>
+                <ResetPassword />
               </AuthRedirect>
             }
           />

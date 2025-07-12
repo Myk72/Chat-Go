@@ -57,7 +57,7 @@ export const VerificationCodeEmail = ({verificationToken }) => {
 
 
 export const ResetPasswordEmail = (resetToken) => {
-  const resetUrl = `${API_URL}/reset_password/${resetToken}` ;
+  const resetUrl = `${API_URL}/reset-password/${resetToken}` ;
 
   return `
     <!DOCTYPE html>

@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { NavLink } from "react-router-dom";
 import { useAuthStore } from "@/store/auth.store";
 import { useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import ForgotPassword from "./ForgotPassword";
 
 const LoginPage = () => {
   const {
@@ -11,21 +14,35 @@ const LoginPage = () => {
     formState: { errors },
     clearErrors,
   } = useForm();
-  const { login } = useAuthStore();
+  const { login, loading } = useAuthStore();
   const navigate = useNavigate();
+  const [forgotPassworOpen, setForgotPasswordOpen] = useState(false);
   const handleLogin = async (data) => {
     try {
       const resp = await login(data);
       if (resp) {
-        navigate("/chat");
+        toast.success("Login successful!");
+        setTimeout(() => {
+          navigate("/chat");
+        }, 1500);
       }
     } catch (error) {
       console.error("Login failed:", error);
       alert("Login failed. Please check your credentials.");
     }
   };
+
+  useEffect(() => {
+    if (loading) {
+      toast.loading("Loading ...");
+    } else {
+      toast.dismiss();
+    }
+  }, [loading]);
+
   return (
     <div className="flex flex-col gap-3 justify-center items-center font-serif w-full p-6">
+      <Toaster />
       <div className="items-center justify-center flex">
         <h1 className="text-3xl font-bold text-indigo-600">Welcome Back</h1>
       </div>
@@ -79,7 +96,10 @@ const LoginPage = () => {
             />
           </div>
           <div className="flex justify-center text-[#4640DE] text-sm">
-            <NavLink className="font-semibold" to="/forgot_password">
+            <NavLink
+              className="font-semibold"
+              onClick={() => setForgotPasswordOpen(true)}
+            >
               Forgot Password?
             </NavLink>
           </div>
@@ -98,6 +118,15 @@ const LoginPage = () => {
           </NavLink>
         </div>
       </div>
+
+      <Dialog open={forgotPassworOpen} onOpenChange={setForgotPasswordOpen}>
+        <DialogContent className="sm:max-w-md top-1/3">
+          <DialogHeader>
+            <DialogTitle>Forgot your password?</DialogTitle>
+          </DialogHeader>
+          <ForgotPassword setForgotPasswordIsOpen={setForgotPasswordOpen} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
