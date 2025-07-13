@@ -6,6 +6,7 @@ import {
   Trash2,
 } from "lucide-react";
 import useMessageStore from "@/store/message.store.js";
+import { useAuthStore } from "@/store/auth.store";
 import React, { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import ShowProfile from "../profile/ShowProfile";
@@ -15,13 +16,33 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:3000");
 
 const MessageCard = ({ receiver }) => {
-  const { messages, fetchChat, sendMessage } = useMessageStore();
+  const { messages, fetchChat } = useMessageStore();
+  const { user } = useAuthStore();
   const [profileOpen, setProfileOpen] = useState(false);
   const [currentMessage, setCurrentMessage] = useState("");
 
   const messagesContainerRef = useRef(null);
+
+  useEffect(() => {
+    console.log("rec.", receiver);
+    if (receiver?._id) {
+      socket.emit("join_conversation", user._id);
+    }
+
+    socket.on("receive_message", (msg) => {
+      console.log("Socket received:", msg);
+      useMessageStore.getState().addMessage(msg);
+    });
+
+    return () => {
+      socket.off("receive_message");
+    };
+  }, [receiver]);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -51,8 +72,25 @@ const MessageCard = ({ receiver }) => {
     e.preventDefault();
     const messageInput = currentMessage.trim();
     if (!messageInput) return;
+
     try {
-      const resp = await sendMessage(receiver._id, messageInput);
+      socket.emit(
+        "send_message",
+        {
+          receiverId: receiver._id,
+          content: messageInput,
+          userId: user?._id,
+        },
+        (response) => {
+          if (response.error) {
+            console.error("Socket error:", response.error);
+          } else {
+            console.log(response.message);
+            useMessageStore.getState().addMessage(response.message);
+          }
+        }
+      );
+
       setCurrentMessage("");
     } catch (error) {
       console.error("Error sending message:", error);

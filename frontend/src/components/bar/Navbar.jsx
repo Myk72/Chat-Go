@@ -59,12 +59,13 @@ const Navbar = () => {
   }, [searchQuery]);
 
   const handleChatClick = (friends) => {
-    useUserStore.setState({ 
-      selectedUser: friends.receiver });
+    useUserStore.setState({
+      selectedUser: friends.receiver,
+    });
   };
 
   return (
-    <div className="shadow-sm p-2 h-screen flex flex-col gap-4">
+    <div className="shadow-sm p-2 h-full sm:h-screen flex flex-col gap-4 sm:max-w-sm md:max-w-xs lg:max-w-sm xl:max-w-md bg-white">
       <input
         type="text"
         placeholder="Search users..."

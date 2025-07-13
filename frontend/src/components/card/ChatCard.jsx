@@ -35,11 +35,11 @@ const ChatCard = ({
             }`}
           ></span>
         </div>
-        <div>
+        <div className="flex flex-col flex-1 min-w-0">
           <p className="font-semibold text-gray-900">
             {receiver.firstName} {receiver.lastName}
           </p>
-          <p className="text-sm text-gray-500 truncate w-72">{lastMessage.content}</p>
+          <p className="text-sm text-gray-500 truncate">{lastMessage.content}</p>
         </div>
       </div>
 

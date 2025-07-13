@@ -32,8 +32,8 @@ const ChatPage = () => {
   // useEffect(() => {}, [selectedUser]);
 
   return (
-    <div className="flex h-screen w-full relative">
-      <div className="w-1/3 h-screen bg-white shadow-md z-10">
+    <div className="flex h-screen w-full relative overflow-hidden">
+      <div className={`w-full sm:w-1/3 h-screen bg-white shadow-md z-10 ${selectedUser ? "hidden sm:block" : "block"}`}>
         <div className="flex items-center space-x-2 p-4 border-b">
           <Menu
             className="mr-4 cursor-pointer"

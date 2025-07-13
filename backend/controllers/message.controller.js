@@ -18,6 +18,7 @@ export const getMessage = async (req, res) => {
     })
       .populate("sender", "username profilePic")
       .populate("receiver", "username profilePic")
+      
       .sort({ timestamp: 1 });
 
     res.status(200).json({ success: true, messages });
@@ -28,51 +29,37 @@ export const getMessage = async (req, res) => {
   }
 };
 
-export const sendMessage = async (req, res) => {
-  const token = req.cookies.token;
-  if (!token) {
-    return res.status(401).json({ success: false, message: "Unauthorized" });
+export const createMessage = async ({ senderId, receiverId, content }) => {
+  if (!receiverId || !content || !senderId) throw new Error("Missing fields");
+
+  let conversation = await Conversation.findOne({
+    isGroup: false,
+    members: { $all: [senderId, receiverId], $size: 2 },
+  });
+
+  if (!conversation) {
+    conversation = await Conversation.create({
+      members: [senderId, receiverId],
+    });
   }
 
-  try {
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET);
-    const { content } = req.body;
-    const { id: receiverId } = req.params;
+  const message = await Message.create({
+    sender: senderId,
+    receiver: receiverId,
+    content,
+    conversationId: conversation._id,
+    seenBy: [senderId],
+    status: "sent",
+  });
 
-    if (!receiverId || !content) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Missing fields" });
-    }
+  conversation.lastMessage = message._id;
+  await conversation.save();
 
-    let conversation = await Conversation.findOne({
-      isGroup: false,
-      members: { $all: [userId, receiverId], $size: 2 },
-    });
+  const populatedMessage = await Message.findById(message._id)
+    .populate("sender", "username profilePic")
+    .populate("receiver", "username profilePic");
 
-    if (!conversation) {
-      conversation = await Conversation.create({
-        members: [userId, receiverId],
-      });
-    }
-
-    const message = await Message.create({
-      sender: userId,
-      receiver: receiverId,
-      content,
-      conversationId: conversation._id,
-      seenBy: [userId],
-      status: "sent",
-    });
-
-    conversation.lastMessage = message._id;
-    await conversation.save();
-
-    res.status(201).json({ success: true, message });
-  } catch (error) {
-    console.error("Error sending message:", error);
-    res.status(500).json({ success: false, message: "Error sending message" });
-  }
+  return populatedMessage;
 };
 
 export const getMessageById = async (req, res) => {

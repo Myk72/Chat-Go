@@ -26,6 +26,14 @@ const useMessageStore = create((set) => ({
       console.error("Error sending message:", error);
     }
   },
+
+  addMessage: (message) => {
+    set((state) => ({
+      messages: [...state.messages, message],
+    }));
+  },
+
+  
 }));
 
 export default useMessageStore;
