@@ -16,8 +16,8 @@ export const getMessage = async (req, res) => {
         { sender: id, receiver: userId },
       ],
     })
-      .populate("sender", "username profilePic")
-      .populate("receiver", "username profilePic")
+      .populate("sender", "_id username profilePic")
+      .populate("receiver", "_id username profilePic")
       
       .sort({ timestamp: 1 });
 

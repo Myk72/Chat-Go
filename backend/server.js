@@ -10,6 +10,7 @@ import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 import messageRouter from "./routes/message.route.js";
 import { createMessage } from "./controllers/message.controller.js";
+import { Message } from "./models/message.model.js";
 
 dotenv.config();
 
@@ -28,8 +29,9 @@ const onlineUsers = new Map();
 io.on("connection", (socket) => {
   console.log("Socket connected:", socket.id);
 
-  socket.on("join_conversation", (receiverId) => {
-    socket.join(receiverId);
+  socket.on("join_conversation", (conversationId) => {
+    // console.log("Here i am", conversationId);
+    socket.join(conversationId);
   });
 
   socket.on("user_online", (userId) => {
@@ -48,7 +50,7 @@ io.on("connection", (socket) => {
     console.log("Socket disconnected:", socket.id);
   });
 
-  socket.on("send_message", async (data, callback) => {
+  socket.on("send_message", async (data) => {
     try {
       console.log("Socket send_message data:", data);
       const { receiverId, content, userId } = data;
@@ -59,18 +61,36 @@ io.on("connection", (socket) => {
         content,
       });
 
-      io.to(receiverId).emit("receive_message", {
-        _id: message._id,
-        sender: message.sender,
-        receiver: message.receiver,
-        content: message.content,
-        conversationId: message.conversationId,
-        timestamp: message.timestamp,
-      });
-      callback({ success: true, message });
+      // console.log(String(message.conversationId), "message.convId");
+
+      io.to(String(message.conversationId)).emit("receive_message", message);
     } catch (err) {
       console.error("Socket send_message error:", err);
       socket.emit("error_message", { error: "Failed to send message" });
+    }
+  });
+
+  socket.on("mark_as_seen", async ({ messageIds, userId, conversationId }) => {
+    console.log("Marking as seen:", { messageIds, userId, conversationId });
+    try {
+      await Message.updateMany(
+        { _id: { $in: messageIds }, seenBy: { $ne: userId } },
+        {
+          $addToSet: { seenBy: userId },
+          $set: { status: "seen" },
+        }
+      ); 
+
+      console.log("Sent here", conversationId)
+
+      io.to(conversationId).emit("message_seen", {
+        messageIds,
+        userId,
+        conversationId,
+      });
+
+    } catch (err) {
+      console.error("Failed to mark messages as seen:", err);
     }
   });
 });

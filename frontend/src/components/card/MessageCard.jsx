@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import useMessageStore from "@/store/message.store.js";
 import { useAuthStore } from "@/store/auth.store";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import ShowProfile from "../profile/ShowProfile";
 import {
@@ -21,54 +21,56 @@ import { socket } from "@/lib/socket";
 import { useUserStore } from "@/store/user.store";
 
 const MessageCard = ({ receiver }) => {
-  const { messages, fetchChat } = useMessageStore();
+  const { messages, markMessageAsSeen } = useMessageStore();
   const { user } = useAuthStore();
   const { onlineUserIds } = useUserStore();
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [currentMessage, setCurrentMessage] = useState("");
 
+  const filteredMessages = useMemo(
+    () =>
+      messages.find((msg) => msg.receiverId === receiver._id)?.messages || [],
+    [messages, receiver]
+  );
+
   const messagesContainerRef = useRef(null);
 
   useEffect(() => {
-    console.log("rec.", receiver);
-    if (receiver?._id) {
-      socket.emit("join_conversation", user._id);
+    if (!receiver || !filteredMessages) return;
+
+    const conversationId = filteredMessages[0].conversationId;
+    const unseenMessages = filteredMessages.filter(
+      (msg) => !msg.seenBy.includes(user._id)
+    );
+    // console.log("Unseen messages:", unseenMessages);
+    if (unseenMessages.length > 0) {
+      socket.emit("mark_as_seen", {
+        messageIds: unseenMessages.map((msg) => msg._id),
+        userId: user._id,
+        conversationId: String(conversationId),
+      });
     }
-
-    socket.on("receive_message", (msg) => {
-      console.log("Socket received:", msg);
-      useMessageStore.getState().addMessage(msg);
-    });
-
-    return () => {
-      socket.off("receive_message");
-    };
-  }, [receiver]);
+  }, [messages, receiver]);
 
   useEffect(() => {
-    const fetchMessages = async () => {
-      if (receiver) {
-        try {
-          const fetchedMessages = await fetchChat(receiver._id);
-          if (fetchedMessages) {
-            console.log("Fetched messages:", fetchedMessages);
-          }
-        } catch (error) {
-          console.error("Error fetching messages:", error);
-        }
-      }
+    const handleMessageSeen = (msg) => {
+      // console.log("Here is mess.");
+      const { messageIds, userId, conversationId } = msg;
+      markMessageAsSeen(messageIds, userId, conversationId);
     };
-
-    fetchMessages();
-  }, [receiver]);
+    socket.on("message_seen", handleMessageSeen);
+    return () => {
+      socket.off("message_seen", handleMessageSeen);
+    };
+  }, []);
 
   useEffect(() => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop =
         messagesContainerRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [filteredMessages]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -76,22 +78,11 @@ const MessageCard = ({ receiver }) => {
     if (!messageInput) return;
 
     try {
-      socket.emit(
-        "send_message",
-        {
-          receiverId: receiver._id,
-          content: messageInput,
-          userId: user?._id,
-        },
-        (response) => {
-          if (response.error) {
-            console.error("Socket error:", response.error);
-          } else {
-            console.log(response.message);
-            useMessageStore.getState().addMessage(response.message);
-          }
-        }
-      );
+      socket.emit("send_message", {
+        receiverId: receiver._id,
+        content: messageInput,
+        userId: user?._id,
+      });
 
       setCurrentMessage("");
     } catch (error) {
@@ -173,7 +164,7 @@ const MessageCard = ({ receiver }) => {
         </div>
       </div>
 
-      {messages.length === 0 ? (
+      {filteredMessages.length === 0 ? (
         <div className="flex justify-center bg-gray-100 text-gray-400 text-sm h-full items-center">
           <span>No messages yet. Start the conversation!</span>
         </div>
@@ -183,7 +174,7 @@ const MessageCard = ({ receiver }) => {
           ref={messagesContainerRef}
         >
           <div className="mt-auto space-y-3">
-            {messages.map((msg) => {
+            {filteredMessages.map((msg) => {
               const isSender = msg.sender._id !== receiver._id;
               return (
                 <div

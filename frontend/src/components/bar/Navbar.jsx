@@ -6,8 +6,14 @@ import { useUserStore } from "@/store/user.store";
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const { users, onlineUserIds,  getUsers, selectedUser, getUserConversation, conversations } =
-  useUserStore();
+  const {
+    users,
+    onlineUserIds,
+    getUsers,
+    selectedUser,
+    getUserConversation,
+    conversations,
+  } = useUserStore();
   const { user } = useAuthStore();
 
   const [filteredChats, setFilteredChats] = useState([]);
@@ -29,7 +35,6 @@ const Navbar = () => {
         lastMessage: conversation.lastMessage,
       };
     });
-    console.log("Filtered Chats:", filtered);
     setFilteredChats(filtered);
   }, [conversations, selectedUser]);
 
@@ -120,10 +125,11 @@ const Navbar = () => {
             filteredChats.map((friends) => (
               <ChatCard
                 key={friends?.chatId}
+                conversationId={friends?.chatId}
                 receiver={friends?.receiver}
                 lastMessage={friends?.lastMessage}
                 isActive={friends?.receiver?._id === selectedUser?._id}
-                isOnline = {onlineUserIds.includes(friends?.receiver?._id)}
+                isOnline={onlineUserIds.includes(friends?.receiver?._id)}
                 onClick={() => handleChatClick(friends)}
               />
             ))

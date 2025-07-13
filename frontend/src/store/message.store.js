@@ -7,33 +7,103 @@ const useMessageStore = create((set) => ({
   fetchChat: async (receiverId) => {
     try {
       const res = await api.get(`/messages/${receiverId}`);
-      set((state) => ({
-        messages: res.data.messages,
-      }));
-      return res.data.messages;
+      const newMessages = res.data.messages;
+
+      if (newMessages.length > 0) {
+        const conversationId = newMessages[0].conversationId;
+
+        set((state) => {
+          const existingConversation = state.messages.find(
+            (conversation) => conversation.conversationId === conversationId
+          );
+
+          if (!existingConversation) {
+            return {
+              messages: [
+                {
+                  conversationId,
+                  receiverId,
+                  messages: newMessages,
+                },
+                ...state.messages,
+              ],
+            };
+          }
+
+          return {
+            messages: state.messages.map((conversation) =>
+              conversation.conversationId === conversationId
+                ? { ...conversation, messages: newMessages }
+                : conversation
+            ),
+          };
+        });
+      }
+
+      return newMessages;
     } catch (error) {
       console.error("Error fetching messages:", error);
-    }
-  },
-  sendMessage: async (receiverId, content) => {
-    try {
-      const res = await api.post(`/messages/${receiverId}`, { content });
-      set((state) => ({
-        messages: [...state.messages, res.data.message],
-      }));
-      return res.data.message;
-    } catch (error) {
-      console.error("Error sending message:", error);
+      throw error;
     }
   },
 
   addMessage: (message) => {
-    set((state) => ({
-      messages: [...state.messages, message],
-    }));
+    set((state) => {
+      const conversationId = message.conversationId;
+      const existingConversation = state.messages.find(
+        (conversation) => conversation.conversationId === conversationId
+      );
+
+      if (existingConversation) {
+        return {
+          messages: state.messages.map((conversation) =>
+            conversation.conversationId === conversationId
+              ? {
+                  ...conversation,
+                  messages: [...conversation.messages, message],
+                }
+              : conversation
+          ),
+        };
+      }
+
+      return {
+        messages: [
+          ...state.messages,
+          {
+            conversationId,
+            receiverId: message.receiver._id,
+            messages: [message],
+          },
+        ],
+      };
+    });
   },
 
-  
+  markMessageAsSeen: (messageIds, userId, conversationId) => {
+    set((state) => {
+      return {
+        messages: state.messages.map((conversation) =>
+          conversation.conversationId === conversationId
+            ? {
+                ...conversation,
+                messages: conversation.messages.map((msg) =>
+                  messageIds.includes(msg._id)
+                    ? {
+                        ...msg,
+                        seenBy: msg.seenBy.includes(userId)
+                          ? msg.seenBy
+                          : [...msg.seenBy, userId],
+                        status: "seen",
+                      }
+                    : msg
+                ),
+              }
+            : conversation
+        ),
+      };
+    });
+  },
 }));
 
 export default useMessageStore;

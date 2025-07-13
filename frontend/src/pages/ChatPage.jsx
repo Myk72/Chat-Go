@@ -20,6 +20,8 @@ import { useAuthStore } from "@/store/auth.store";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import MyProfile from "@/components/Profile";
 import NewGroup from "@/components/NewGroup";
+import useMessageStore from "@/store/message.store";
+import { socket } from "@/lib/socket";
 
 const ChatPage = () => {
   const { selectedUser } = useUserStore();
@@ -32,7 +34,20 @@ const ChatPage = () => {
   const navigate = useNavigate();
   const { logout, user } = useAuthStore();
 
-  // useEffect(() => {}, [selectedUser]);
+  useEffect(() => {
+    const handleNewMessage = (msg) => {
+      console.log("Received mess", msg);
+      useMessageStore.getState().addMessage(msg);
+    };
+
+    socket.on("receive_message", handleNewMessage);
+
+    return () => {
+      socket.off("receive_message");
+    };
+  }, []);
+
+
 
   return (
     <div className="flex h-screen w-full relative overflow-hidden">
