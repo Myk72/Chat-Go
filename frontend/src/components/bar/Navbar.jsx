@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
 import ChatCard from "../card/ChatCard";
-import useMessageStore from "@/store/message.store.js";
 import { useAuthStore } from "@/store/auth.store";
 import { useUserStore } from "@/store/user.store";
-import { XCircle } from "lucide-react";
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const { users, getUsers, selectedUser, getUserConversation, conversations } =
-    useUserStore();
+  const { users, onlineUserIds,  getUsers, selectedUser, getUserConversation, conversations } =
+  useUserStore();
   const { user } = useAuthStore();
 
   const [filteredChats, setFilteredChats] = useState([]);
@@ -65,7 +63,7 @@ const Navbar = () => {
   };
 
   return (
-    <div className="shadow-sm p-2 h-full sm:h-screen flex flex-col gap-4 sm:max-w-sm md:max-w-xs lg:max-w-sm xl:max-w-md bg-white">
+    <div className="shadow-sm p-2 h-full sm:h-screen flex flex-col gap-4 md:max-w-sm lg:max-w-xl xl:max-w-full bg-white">
       <input
         type="text"
         placeholder="Search users..."
@@ -125,6 +123,7 @@ const Navbar = () => {
                 receiver={friends?.receiver}
                 lastMessage={friends?.lastMessage}
                 isActive={friends?.receiver?._id === selectedUser?._id}
+                isOnline = {onlineUserIds.includes(friends?.receiver?._id)}
                 onClick={() => handleChatClick(friends)}
               />
             ))

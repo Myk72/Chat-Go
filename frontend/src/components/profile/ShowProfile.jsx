@@ -1,6 +1,9 @@
+import { useUserStore } from "@/store/user.store";
 import React from "react";
 
 const ShowProfile = ({ receiver }) => {
+  const { onlineUserIds } = useUserStore();
+  const isOnline = onlineUserIds.includes(receiver._id);
   return (
     <div className="space-y-6 font-serif p-4">
       <div className="flex items-center space-x-4 border-b pb-4">
@@ -24,10 +27,10 @@ const ShowProfile = ({ receiver }) => {
           </p>
           <p
             className={`text-xs text-gray-500 ${
-              receiver.is_online ? "text-green-400" : ""
+              isOnline ? "text-green-400" : ""
             }`}
           >
-            {receiver.is_online ? "Online" : "Offline"}
+            {isOnline ? "Online" : "Offline"}
           </p>
         </div>
       </div>

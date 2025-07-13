@@ -23,12 +23,29 @@ const io = new Server(server, {
 });
 
 const PORT = process.env.PORT || 3000;
+const onlineUsers = new Map();
 
 io.on("connection", (socket) => {
   console.log("Socket connected:", socket.id);
 
   socket.on("join_conversation", (receiverId) => {
     socket.join(receiverId);
+  });
+
+  socket.on("user_online", (userId) => {
+    onlineUsers.set(userId, socket.id);
+    io.emit("update_online_users", Array.from(onlineUsers.keys()));
+  });
+
+  socket.on("disconnect", () => {
+    for (let [userId, sockId] of onlineUsers) {
+      if (sockId === socket.id) {
+        onlineUsers.delete(userId);
+        break;
+      }
+    }
+    io.emit("update_online_users", Array.from(onlineUsers.keys()));
+    console.log("Socket disconnected:", socket.id);
   });
 
   socket.on("send_message", async (data, callback) => {
@@ -55,9 +72,6 @@ io.on("connection", (socket) => {
       console.error("Socket send_message error:", err);
       socket.emit("error_message", { error: "Failed to send message" });
     }
-  });
-  socket.on("disconnect", () => {
-    console.log("Socket disconnected:", socket.id);
   });
 });
 

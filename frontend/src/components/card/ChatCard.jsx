@@ -1,11 +1,6 @@
 import React from "react";
 
-const ChatCard = ({
-  receiver,
-  isActive,
-  onClick,
-  lastMessage,
-}) => {
+const ChatCard = ({ receiver, isActive, onClick, lastMessage, isOnline }) => {
   return (
     <div
       className={`flex items-center justify-between px-2 py-3 hover:bg-gray-100 rounded-lg cursor-pointer ${
@@ -31,15 +26,17 @@ const ChatCard = ({
           )}
           <span
             className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
-              receiver.is_online ? "bg-green-500" : "bg-gray-400"
+              isOnline ? "bg-green-500" : "bg-gray-400"
             }`}
           ></span>
         </div>
-        <div className="flex flex-col flex-1 min-w-0">
+        <div className="flex flex-col flex-1">
           <p className="font-semibold text-gray-900">
             {receiver.firstName} {receiver.lastName}
           </p>
-          <p className="text-sm text-gray-500 truncate">{lastMessage.content}</p>
+          <p className="text-sm text-gray-500 truncate">
+            {lastMessage.content}
+          </p>
         </div>
       </div>
 
@@ -50,7 +47,6 @@ const ChatCard = ({
             minute: "2-digit",
           })}
         </p>
-        
       </div>
     </div>
   );

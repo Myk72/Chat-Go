@@ -19,7 +19,8 @@ import { Button } from "@/components/ui/button";
 
 const Settings = () => {
   const { user } = useAuthStore();
-  const { uploadProfilePic, editProfile } = useUserStore();
+  const { uploadProfilePic, editProfile, onlineUserIds } = useUserStore();
+  const isOnline = onlineUserIds.includes(user._id);
   const [image, setImage] = useState(null);
 
   const [openField, setOpenField] = useState(null);
@@ -97,7 +98,7 @@ const Settings = () => {
         <h2 className="font-semibold">
           {user.firstName} {user.lastName}
         </h2>
-        {user.is_online ? (
+        {isOnline ? (
           <p className="text-green-500 text-sm">Online</p>
         ) : (
           <p className="text-gray-500 text-sm">Offline</p>

@@ -11,6 +11,7 @@ import {
   LogOut,
   Users,
 } from "lucide-react";
+
 import Settings from "./Settings";
 import MessageCard from "../components/card/MessageCard";
 import { useUserStore } from "@/store/user.store";
@@ -18,12 +19,14 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/auth.store";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import MyProfile from "@/components/Profile";
+import NewGroup from "@/components/NewGroup";
 
 const ChatPage = () => {
   const { selectedUser } = useUserStore();
   const [showMenu, setShowMenu] = useState(false);
   const [settingOpen, setSettingOpen] = useState(false);
   const [myProfileOpen, setMyProfileOpen] = useState(false);
+  const [newgroupOpen, setNewGroupOpen] = useState(false);
   const [logoutVerify, setLogoutVerify] = useState(false);
   const [theme, setTheme] = useState("light");
   const navigate = useNavigate();
@@ -33,7 +36,11 @@ const ChatPage = () => {
 
   return (
     <div className="flex h-screen w-full relative overflow-hidden">
-      <div className={`w-full sm:w-1/3 h-screen bg-white shadow-md z-10 ${selectedUser ? "hidden sm:block" : "block"}`}>
+      <div
+        className={`w-full sm:w-1/3 h-screen bg-white shadow-md z-10 ${
+          selectedUser ? "hidden sm:block" : "block"
+        }`}
+      >
         <div className="flex items-center space-x-2 p-4 border-b">
           <Menu
             className="mr-4 cursor-pointer"
@@ -45,7 +52,7 @@ const ChatPage = () => {
         <Navbar />
       </div>
 
-      <div className="w-2/3 flex-1 overflow-hidden h-screen">
+      <div className="w-full sm:w-2/3 flex-1 overflow-hidden">
         {selectedUser ? (
           <MessageCard receiver={selectedUser} />
         ) : (
@@ -91,7 +98,7 @@ const ChatPage = () => {
                   className="flex items-center space-x-2 cursor-pointer border-b py-2 hover:bg-gray-100"
                   onClick={() => {
                     setShowMenu(false);
-                    setMyProfileOpen(true);
+                    setNewGroupOpen(true);
                   }}
                 >
                   <Users />
@@ -139,6 +146,11 @@ const ChatPage = () => {
       <Dialog open={myProfileOpen} onOpenChange={setMyProfileOpen}>
         <DialogContent className={"sm:max-w-md"}>
           <MyProfile />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={newgroupOpen} onOpenChange={setNewGroupOpen}>
+        <DialogContent className={"sm:max-w-sm top-1/4 p-4"}>
+          <NewGroup />
         </DialogContent>
       </Dialog>
       <Dialog

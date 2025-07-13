@@ -4,6 +4,7 @@ import {
   SearchIcon,
   SendHorizontal,
   Trash2,
+  ArrowLeft,
 } from "lucide-react";
 import useMessageStore from "@/store/message.store.js";
 import { useAuthStore } from "@/store/auth.store";
@@ -16,13 +17,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { io } from "socket.io-client";
-
-const socket = io("http://localhost:3000");
+import { socket } from "@/lib/socket";
+import { useUserStore } from "@/store/user.store";
 
 const MessageCard = ({ receiver }) => {
   const { messages, fetchChat } = useMessageStore();
   const { user } = useAuthStore();
+  const { onlineUserIds } = useUserStore();
+
   const [profileOpen, setProfileOpen] = useState(false);
   const [currentMessage, setCurrentMessage] = useState("");
 
@@ -103,6 +105,17 @@ const MessageCard = ({ receiver }) => {
         className="flex items-center space-x-3 px-4 py-3 border cursor-pointer"
         onClick={() => setProfileOpen(true)}
       >
+        <div
+          className="sm:hidden"
+          onClick={(e) => {
+            e.stopPropagation();
+            useUserStore.setState({
+              selectedUser: null,
+            });
+          }}
+        >
+          <ArrowLeft className="size-8 p-1 rounded hover:bg-gray-100" />
+        </div>
         {receiver.profilePic ? (
           <img
             src={receiver.profilePic}
@@ -122,9 +135,11 @@ const MessageCard = ({ receiver }) => {
             {receiver.firstName} {receiver.lastName}
           </p>
           <p
-            className={`text-xs ${receiver.is_online ? "text-green-400" : ""}`}
+            className={`text-xs ${
+              onlineUserIds.includes(receiver._id) ? "text-green-400" : ""
+            }`}
           >
-            {receiver.is_online ? "Online" : "Offline"}
+            {onlineUserIds.includes(receiver._id) ? "Online" : "Offline"}
           </p>
         </div>
         <div className="ml-auto flex items-center">

@@ -7,6 +7,8 @@ export const useUserStore = create((set) => ({
   selectedUser: null,
   loading: false,
   error: null,
+  onlineUserIds: [],
+  setOnlineUserIds: (ids) => set({ onlineUserIds: ids }),
 
   getUsers: async (searchQuery) => {
     set({ loading: true, error: null });

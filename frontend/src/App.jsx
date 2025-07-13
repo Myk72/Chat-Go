@@ -12,6 +12,8 @@ import { useEffect } from "react";
 import { useAuthStore } from "./store/auth.store";
 import { useNavigate } from "react-router-dom";
 import ResetPassword from "./pages/auth/resetPassword";
+import { socket } from "./lib/socket";
+import { useUserStore } from "./store/user.store";
 
 const AuthRedirect = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
@@ -44,6 +46,22 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const App = () => {
+  const { user } = useAuthStore();
+
+  useEffect(() => {
+    if (user?._id) {
+      socket.emit("user_online", user._id);
+
+      socket.on("update_online_users", (onlineUsers) => {
+        useUserStore.setState({ onlineUserIds: onlineUsers });
+      });
+    }
+
+    return () => {
+      socket.off("update_online_users");
+    };
+  }, [user]);
+  
   return (
     <div className="w-full min-h-screen flex justify-center items-center">
       <Routes>
