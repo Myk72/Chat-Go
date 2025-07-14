@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
 
-export const socket = io("http://localhost:3000", {
+export const socket = io("https://chat-go-n43g.onrender.com", {
   reconnectionAttempts: 5,
 });
