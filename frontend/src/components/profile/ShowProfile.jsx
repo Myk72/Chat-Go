@@ -43,15 +43,19 @@ const ShowProfile = ({ receiver }) => {
           <p className="text-muted-foreground text-sm">Email</p>
         </div>
 
-        <div>
-          <p className="text-gray-800">{receiver.bio}</p>
-          <p className="text-muted-foreground text-sm">Bio</p>
-        </div>
+        {receiver.bio && (
+          <div>
+            <p className="text-gray-800">{receiver.bio}</p>
+            <p className="text-muted-foreground text-sm">Bio</p>
+          </div>
+        )}
 
-        <div>
-          <p className="text-gray-800">@{receiver.username}</p>
-          <p className="text-muted-foreground text-sm">Username</p>
-        </div>
+        {receiver.username && (
+          <div>
+            <p className="text-gray-800">@{receiver.username}</p>
+            <p className="text-muted-foreground text-sm">Username</p>
+          </div>
+        )}
       </div>
     </div>
   );

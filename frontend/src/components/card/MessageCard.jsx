@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { socket } from "@/lib/socket";
 import { useUserStore } from "@/store/user.store";
+import { MdDone, MdDoneAll } from "react-icons/md";
 
 const MessageCard = ({ receiver }) => {
   const { messages, markMessageAsSeen } = useMessageStore();
@@ -186,16 +187,27 @@ const MessageCard = ({ receiver }) => {
                   <div
                     className={`max-w-xl px-4 py-2 rounded-lg text-sm shadow-md ${
                       isSender
-                        ? "bg-green-600 text-white rounded-br-none"
-                        : "bg-blue-100 text-gray-800 rounded-bl-none"
+                        ? "bg-green-600 text-white rounded-br-none rounded-tl-lg"
+                        : "bg-blue-100 text-gray-800 rounded-bl-none rounded-tr-lg"
                     }`}
                   >
                     <div>{msg.content}</div>
-                    <div className={`text-xs opacity-70 text-end`}>
-                      {new Date(msg.timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                    <div className="flex items-center justify-end text-xs opacity-70">
+                      <span className={`${isSender ? "mr-2" : "ml-2"}`}>
+                        {new Date(msg.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                      {isSender && (
+                        <span>
+                          {msg.seenBy.includes(receiver._id) ? (
+                            <MdDoneAll className="w-4 h-4 text-white" />
+                          ) : (
+                            <MdDone className="w-4 h-4 text-white" />
+                          )}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
